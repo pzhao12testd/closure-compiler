@@ -108,8 +108,6 @@ class StripCode implements CompilerPass {
     public void visit(NodeTraversal t, Node n, Node parent) {
       switch (n.getToken()) {
         case VAR:
-        case CONST:
-        case LET:
           removeVarDeclarationsByNameOrRvalue(t, n, parent);
           break;
 
@@ -150,18 +148,19 @@ class StripCode implements CompilerPass {
     }
 
     /**
-     * Removes declarations of any variables whose names are strip names or whose whose r-values are
-     * static method calls on strip types. Builds a set of removed variables so that all references
-     * to them can be removed.
+     * Removes declarations of any variables whose names are strip names or
+     * whose whose r-values are static method calls on strip types. Builds a set
+     * of removed variables so that all references to them can be removed.
      *
      * @param t The traversal
-     * @param n A VAR, CONST, or LET node
+     * @param n A VAR node
      * @param parent {@code n}'s parent
      */
-    void removeVarDeclarationsByNameOrRvalue(NodeTraversal t, Node n, Node parent) {
+    void removeVarDeclarationsByNameOrRvalue(NodeTraversal t, Node n,
+        Node parent) {
       Node next = null;
-      // TODO(b/72223678): handle destructuring declarations below.
-      for (Node nameNode = n.getFirstChild(); nameNode != null; nameNode = next) {
+      for (Node nameNode = n.getFirstChild(); nameNode != null;
+          nameNode = next) {
         next = nameNode.getNext();
         String name = nameNode.getString();
         if (isStripName(name)
@@ -191,8 +190,6 @@ class StripCode implements CompilerPass {
                                                Node parent) {
       switch (parent.getToken()) {
         case VAR:
-        case CONST:
-        case LET:
           // This is a variable declaration, not a reference.
           break;
 
@@ -385,22 +382,14 @@ class StripCode implements CompilerPass {
       //   ...
       Node key = n.getFirstChild();
       while (key != null) {
-        switch (key.getToken()) {
-          case GETTER_DEF:
-          case SETTER_DEF:
-          case STRING_KEY:
-          case MEMBER_FUNCTION_DEF:
-            if (isStripName(key.getString())) {
-              Node next = key.getNext();
-              n.removeChild(key);
-              NodeUtil.markFunctionsDeleted(key, compiler);
-              key = next;
-              compiler.reportChangeToEnclosingScope(n);
-              break;
-            }
-            // fall through
-          default:
-            key = key.getNext();
+        if (isStripName(key.getString())) {
+          Node next = key.getNext();
+          n.removeChild(key);
+          NodeUtil.markFunctionsDeleted(key, compiler);
+          key = next;
+          compiler.reportChangeToEnclosingScope(n);
+        } else {
+          key = key.getNext();
         }
       }
     }

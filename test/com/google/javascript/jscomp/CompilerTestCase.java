@@ -26,7 +26,6 @@ import com.google.common.annotations.GwtIncompatible;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.errorprone.annotations.ForOverride;
 import com.google.javascript.jscomp.AbstractCompiler.MostRecentTypechecker;
@@ -44,10 +43,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import junit.framework.TestCase;
@@ -181,8 +178,6 @@ public abstract class CompilerTestCase extends TestCase {
   private boolean astValidationEnabled;
 
   private final Set<DiagnosticType> ignoredWarnings = new HashSet<>();
-
-  private final Map<String, String> webpackModulesById = new HashMap<>();
 
   /** Whether {@link #setUp} has run. */
   private boolean setUpRan = false;
@@ -622,7 +617,6 @@ public abstract class CompilerTestCase extends TestCase {
     options.setEmitUseStrict(false);
     options.setLanguageOut(languageOut);
     options.setModuleResolutionMode(moduleResolutionMode);
-    options.setPreserveTypeAnnotations(true);
 
     // This doesn't affect whether checkSymbols is run--it just affects
     // whether variable warnings are filtered.
@@ -941,11 +935,6 @@ public abstract class CompilerTestCase extends TestCase {
   protected final void setExpectParseWarningsThisTest() {
     checkState(this.setUpRan, "Attempted to configure before running setUp().");
     expectParseWarningsThisTest = true;
-  }
-
-  protected final void setWebpackModulesById(Map<String, String> webpackModulesById) {
-    this.webpackModulesById.clear();
-    this.webpackModulesById.putAll(webpackModulesById);
   }
 
   /** Returns a newly created TypeCheck. */
@@ -2032,9 +2021,6 @@ public abstract class CompilerTestCase extends TestCase {
   protected Compiler createCompiler() {
     Compiler compiler = new Compiler();
     compiler.setFeatureSet(acceptedLanguage.toFeatureSet());
-    if (!webpackModulesById.isEmpty()) {
-      compiler.initWebpackMap(ImmutableMap.copyOf(webpackModulesById));
-    }
     return compiler;
   }
 

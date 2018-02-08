@@ -121,33 +121,6 @@ public final class StripCodeTest extends CompilerTestCase {
          "}");
   }
 
-  public void testLoggerDefinedInPrototype6() {
-    test(
-        lines(
-            "var a = {};",
-            "a.b = function() {};",
-            "a.b.prototype = { ",
-            "  logger(a) {this.x = goog.debug.Logger.getLogger('a.b.c')}",
-            "}"),
-        "var a = {}; a.b = function() {}; a.b.prototype = {}");
-  }
-
-  public void testLoggerDefinedInPrototype7() {
-    test(
-        lines(
-            "var a = {};",
-            "a.b = function() {};",
-            "a.b.prototype = { ",
-            "  ['logger']: goog.debug.Logger.getLogger('a.b.c')",
-            "}"),
-        lines(
-            "var a = {};",
-            "a.b = function() {};",
-            "a.b.prototype = { ",
-            "  ['logger']: null",
-            "}"));
-  }
-
   public void testLoggerDefinedStatically() {
     test("a.b.c = function() {};" +
          "a.b.c.logger = goog.debug.Logger.getLogger('a.b.c');",
@@ -196,35 +169,6 @@ public final class StripCodeTest extends CompilerTestCase {
          "};");
   }
 
-  public void testLoggerDefinedInObjectLiteral5() {
-    test(
-        lines(
-            "var a = {};",
-            "a.b = {",
-            "  x: 0,",
-            "  logger() { return goog.debug.Logger.getLogger('a.b.c'); }",
-            "};"),
-        "var a = {}; a.b={x:0}");
-  }
-
-  public void testLoggerDefinedInObjectLiteral6() {
-    test(
-        lines(
-            "var a = {};",
-            "a.b = {",
-            "  x: 0,",
-            "  ['logger']: goog.debug.Logger.getLogger('a.b.c')",
-            "};",
-            "a.b['logger']();"),
-        lines(
-            "var a = {};",
-            "a.b = {",
-            "  x: 0,",
-            "  ['logger']: null", // Don't strip computed properties
-            "};",
-            "a.b['logger']()"));
-  }
-
   public void testLoggerDefinedInPrototypeAndUsedInConstructor() {
     test("a.b.c = function(level) {" +
          "  if (!this.logger.isLoggable(level)) {" +
@@ -251,14 +195,6 @@ public final class StripCodeTest extends CompilerTestCase {
 
   public void testLoggerVarDeclaration() {
     test("var logger = opt_logger || goog.debug.LogManager.getRoot();", "");
-  }
-
-  public void testLoggerLetDeclaration() {
-    test("let logger = opt_logger || goog.debug.LogManager.getRoot();", "");
-  }
-
-  public void testLoggerConstDeclaration() {
-    test("const logger = opt_logger || goog.debug.LogManager.getRoot();", "");
   }
 
   public void testLoggerMethodCallByVariableType() {
@@ -464,17 +400,17 @@ public final class StripCodeTest extends CompilerTestCase {
          StripCode.STRIP_ASSIGNMENT_ERROR);
   }
 
-  public void testNewOperator1() {
+  public void testNewOperatior1() {
     test("function foo() {} foo.bar = new goog.debug.Logger();",
          "function foo() {} foo.bar = null;");
   }
 
-  public void testNewOperator2() {
+  public void testNewOperatior2() {
     test("function foo() {} foo.bar = (new goog.debug.Logger()).foo();",
          "function foo() {} foo.bar = null;");
   }
 
-  public void testNewOperator3() {
+  public void testNewOperatior3() {
     test("(new goog.debug.Logger()).foo().bar = 2;",
          "2;");
   }

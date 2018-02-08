@@ -4227,23 +4227,6 @@ public final class IntegrationTest extends IntegrationTestCase {
     test(options, code, "");
   }
 
-  public void testGoogDefineClassWithNti() {
-    CompilerOptions options = createCompilerOptions();
-    options.setNewTypeInference(true);
-    options.setClosurePass(true);
-
-    String code = lines(
-        "var Foo = goog.defineClass(null,",
-        "  {",
-        "    statics: {",
-        "      a: /** @type {number} */ ('asdf')",
-        "    },",
-        "    constructor: function() {}",
-        "  });");
-
-    test(options, code, NewTypeInference.INVALID_CAST);
-  }
-
   public void testCheckConstants1() {
     CompilerOptions options = createCompilerOptions();
     CompilationLevel level = CompilationLevel.SIMPLE_OPTIMIZATIONS;
@@ -4298,19 +4281,8 @@ public final class IntegrationTest extends IntegrationTestCase {
     compile(options, code);
   }
 
-  // Due to JsFileParse not being supported in the JS version, the dependency parsing delegates to
-  // the {@link CompilerInput$DepsFinder} class which is incompatible with the
-  // DefaultCodingConvention due to it throwing on methods such as extractIsModuleFile which is
-  // needed in {@link CompilerInput$DepsFinder#visitSubtree}. Disable this test in the JsVersion.
-  // TODO(tdeegan): DepsFinder should error out early if run with DefaultCodingConvention.
-  @GwtIncompatible
-  public void testES6UnusedClassesAreRemovedDefaultCodingConvention() {
-    testES6UnusedClassesAreRemoved(CodingConventions.getDefault());
-  }
-
   // Tests that unused classes are removed, even if they are passed to $jscomp.inherits.
-  private void
-      testES6UnusedClassesAreRemoved(CodingConvention convention) {
+  private void testES6UnusedClassesAreRemoved(CodingConvention convention) {
     CompilerOptions options = createCompilerOptions();
     options.setLanguageIn(LanguageMode.ECMASCRIPT_2015);
     options.setLanguageOut(LanguageMode.ECMASCRIPT3);
@@ -4322,6 +4294,16 @@ public final class IntegrationTest extends IntegrationTestCase {
         "alert(1);"));
     String result = compiler.toSource(compiler.getJsRoot());
     assertThat(result).isEqualTo("alert(1)");
+  }
+
+  // Due to JsFileParse not being supported in the JS version, the dependency parsing delegates to
+  // the {@link CompilerInput$DepsFinder} class which is incompatible with the
+  // DefaultCodingConvention due to it throwing on methods such as extractIsModuleFile which is
+  // needed in {@link CompilerInput$DepsFinder#visitSubtree}. Disable this test in the JsVersion.
+  // TODO(tdeegan): DepsFinder should error out early if run with DefaultCodingConvention.
+  @GwtIncompatible
+  public void testES6UnusedClassesAreRemovedDefaultCodingConvention() {
+    testES6UnusedClassesAreRemoved(CodingConventions.getDefault());
   }
 
   public void testES6UnusedClassesAreRemoved() {

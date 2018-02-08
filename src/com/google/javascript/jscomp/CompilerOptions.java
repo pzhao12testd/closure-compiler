@@ -33,7 +33,6 @@ import com.google.common.primitives.Chars;
 import com.google.javascript.jscomp.deps.ModuleLoader;
 import com.google.javascript.jscomp.parsing.Config;
 import com.google.javascript.jscomp.parsing.parser.FeatureSet;
-import com.google.javascript.jscomp.resources.ResourceLoader;
 import com.google.javascript.rhino.IR;
 import com.google.javascript.rhino.Node;
 import com.google.javascript.rhino.SourcePosition;
@@ -1182,13 +1181,8 @@ public class CompilerOptions implements Serializable {
 
   String instrumentationTemplateFile;
 
-  /**
-   * List of conformance configs to use in CheckConformance.
-   *
-   * <p>The first entry of this list is always the Global ConformanceConfig
-   */
-  private ImmutableList<ConformanceConfig> conformanceConfigs =
-      ImmutableList.of(ResourceLoader.loadGlobalConformance(CompilerOptions.class));
+  /** List of conformance configs to use in CheckConformance */
+  private ImmutableList<ConformanceConfig> conformanceConfigs = ImmutableList.of();
 
   /**
    * For use in {@link CompilationLevel#WHITESPACE_ONLY} mode, when using goog.module.
@@ -1611,6 +1605,13 @@ public class CompilerOptions implements Serializable {
   }
 
   /**
+   * Sets the hash function to use for Xid
+   */
+  public void setXidHashFunction(Xid.HashFunction xidHashFunction) {
+    this.xidHashFunction = xidHashFunction;
+  }
+
+  /**
    * Sets the id generators to replace.
    */
   public void setIdGenerators(Map<String, RenamingMap> idGenerators) {
@@ -1624,13 +1625,6 @@ public class CompilerOptions implements Serializable {
    */
   public void setIdGeneratorsMap(String previousMappings) {
     this.idGeneratorsMapSerialized = previousMappings;
-  }
-
-  /**
-   * Sets the hash function to use for Xid
-   */
-  public void setXidHashFunction(Xid.HashFunction xidHashFunction) {
-    this.xidHashFunction = xidHashFunction;
   }
 
   private Reach inlineFunctionsLevel;
@@ -1658,10 +1652,6 @@ public class CompilerOptions implements Serializable {
   public void setMaxFunctionSizeAfterInlining(int funAstSize) {
     checkArgument(funAstSize > 0);
     this.maxFunctionSizeAfterInlining = funAstSize;
-  }
-
-  public void setInlineVariables(boolean inlineVariables) {
-    this.inlineVariables = inlineVariables;
   }
 
   /**
@@ -2254,6 +2244,10 @@ public class CompilerOptions implements Serializable {
     this.crossModuleMethodMotion = crossModuleMethodMotion;
   }
 
+  public void setInlineVariables(boolean inlineVariables) {
+    this.inlineVariables = inlineVariables;
+  }
+
   public void setInlineLocalVariables(boolean inlineLocalVariables) {
     this.inlineLocalVariables = inlineLocalVariables;
   }
@@ -2786,14 +2780,16 @@ public class CompilerOptions implements Serializable {
     }
   }
 
-  public final ImmutableList<ConformanceConfig> getConformanceConfigs() {
+  public List<ConformanceConfig> getConformanceConfigs() {
     return conformanceConfigs;
   }
 
-  /** Both enable and configure conformance checks, if non-null. */
+  /**
+   * Both enable and configure conformance checks, if non-null.
+   */
   @GwtIncompatible("Conformance")
   public void setConformanceConfig(ConformanceConfig conformanceConfig) {
-    setConformanceConfigs(ImmutableList.of(conformanceConfig));
+    this.conformanceConfigs = ImmutableList.of(conformanceConfig);
   }
 
   /**
@@ -2801,11 +2797,7 @@ public class CompilerOptions implements Serializable {
    */
   @GwtIncompatible("Conformance")
   public void setConformanceConfigs(List<ConformanceConfig> configs) {
-    this.conformanceConfigs =
-        ImmutableList.<ConformanceConfig>builder()
-            .add(ResourceLoader.loadGlobalConformance(CompilerOptions.class))
-            .addAll(configs)
-            .build();
+    this.conformanceConfigs = ImmutableList.copyOf(configs);
   }
 
   public boolean shouldEmitUseStrict() {

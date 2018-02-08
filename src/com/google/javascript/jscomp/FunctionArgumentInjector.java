@@ -161,7 +161,6 @@ class FunctionArgumentInjector {
           Node array = IR.arraylit();
           argMap.put(fnParam.getOnlyChild().getString(), array);
         } else {
-          checkState(fnParam.isName(), fnParam);
           Node srcLocation = callNode;
           argMap.put(fnParam.getString(), NodeUtil.newUndefinedNode(srcLocation));
         }

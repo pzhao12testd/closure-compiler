@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.javascript.jscomp.Es6SyntacticScopeCreator.RedeclarationHandler;
 import com.google.javascript.jscomp.NodeTraversal.AbstractPostOrderCallback;
-import com.google.javascript.jscomp.NodeTraversal.Callback;
 import com.google.javascript.rhino.IR;
 import com.google.javascript.rhino.JSDocInfo;
 import com.google.javascript.rhino.JSDocInfoBuilder;
@@ -300,15 +299,7 @@ class VarCheck extends AbstractPostOrderCallback implements
    * A check for name references in the externs inputs. These used to prevent
    * a variable from getting renamed, but no longer have any effect.
    */
-  private class NameRefInExternsCheck implements Callback {
-
-    @Override
-    public boolean shouldTraverse(NodeTraversal t, Node n, Node parent) {
-      // Type summaries are generated from code rather than hand-written,
-      // so warning about name references there would usually not be helpful.
-      return !n.isScript() || !NodeUtil.isFromTypeSummary(n);
-    }
-
+  private class NameRefInExternsCheck extends AbstractPostOrderCallback {
     @Override
     public void visit(NodeTraversal t, Node n, Node parent) {
       if (n.isName()) {

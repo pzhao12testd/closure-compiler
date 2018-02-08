@@ -170,11 +170,6 @@ public final class DefaultPassConfig extends PassConfig {
       passes.add(dartSuperAccessorsPass);
     }
 
-    if (options.needsTranspilationFrom(ES_NEXT)) {
-      TranspilationPasses.addEs2018Passes(passes);
-      passes.add(setFeatureSet(ES8));
-    }
-
     if (options.needsTranspilationFrom(ES8)) {
       TranspilationPasses.addEs2017Passes(passes);
       passes.add(setFeatureSet(ES7));
@@ -286,8 +281,8 @@ public final class DefaultPassConfig extends PassConfig {
     }
 
     if (options.needsTranspilationFrom(ES_NEXT)) {
-      TranspilationPasses.addEs2018Passes(checks);
-      checks.add(setFeatureSet(ES8));
+      // placeholder for a transpilation pass from ES_NEXT to ES8.
+      checks.add(setFeatureSet(ES8_MODULES));
     }
 
     if (options.enables(DiagnosticGroups.LINT_CHECKS)) {
@@ -1745,7 +1740,7 @@ public final class DefaultPassConfig extends PassConfig {
     final boolean late = false;
     final boolean useTypesForOptimization = compiler.getOptions().useTypesForLocalOptimization;
     List<AbstractPeepholeOptimization> optimizations = new ArrayList<>();
-    optimizations.add(new MinimizeExitPoints());
+    optimizations.add(new MinimizeExitPoints(compiler));
     optimizations.add(new PeepholeMinimizeConditions(late));
     optimizations.add(new PeepholeSubstituteAlternateSyntax(late));
     optimizations.add(new PeepholeReplaceKnownMethods(late, useTypesForOptimization));
@@ -2361,7 +2356,7 @@ public final class DefaultPassConfig extends PassConfig {
 
         @Override
         public FeatureSet featureSet() {
-          return ES8_MODULES;
+          return ES5;
         }
       };
 
@@ -2819,7 +2814,8 @@ public final class DefaultPassConfig extends PassConfig {
 
         @Override
         public FeatureSet featureSet() {
-          return ES8_MODULES;
+          // TODO(b/69850796): Switch this back to ES8_MODULES.
+          return ES5;
         }
       };
 
@@ -3622,7 +3618,7 @@ public final class DefaultPassConfig extends PassConfig {
 
         @Override
         public FeatureSet featureSet() {
-          return ES_NEXT;
+          return ES8_MODULES;
         }
       };
 
